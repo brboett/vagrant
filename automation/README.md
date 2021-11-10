@@ -1,5 +1,5 @@
-## Automation Server
-# Installs the Following:
+#### Automation Server
+### Installs the Following:
 * Ubuntu Focal
 * Jenkins
 * Packer
