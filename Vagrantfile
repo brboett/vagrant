@@ -1,0 +1,37 @@
+Vagrant.configure("2") do |config|
+    config.vm.box = "ubuntu/focal64"   
+    config.vm.network "public_network", bridge: "enp0s25", ip: "192.168.0.134"
+    config.vm.hostname = "automation.home.lab"
+
+    config.vm.provider "virtualbox" do |v|
+        v.name = "automation"
+        v.check_guest_additions = true
+        v.memory = 4096
+        v.cpus = 2
+    end
+    
+    config.vm.provision "shell", inline: <<-SHELL
+        # Install Updates & Prequisites
+        sudo apt-get update && sudo apt-get upgrade -y
+        apt-get install -y curl unzip
+    
+        # Install Jenkins
+        # Get First Time Password: sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+        wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+        sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+        apt-get update
+        apt-get install -y openjdk-8-jre
+        apt-get install -y jenkins
+
+        # Install Packer
+        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+        sudo apt-get update && sudo apt-get install packer
+
+        # Install AWS CLI
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install        
+
+    SHELL
+  end
